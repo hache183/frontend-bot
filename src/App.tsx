@@ -9,14 +9,36 @@ import PerformanceStats from "./components/PerformanceStats";
 import EventLog from "./components/EventLog";
 import BackupExport from "./components/BackupExport";
 import Notification from "./components/Notification";
+import { useBotStatus } from "./hooks/useBotStatus";
+import { useApiConfig } from "./hooks/useApiConfig";
+import { useNotification } from "./hooks/useNotification";
 import "./App.css";
 
 function App() {
   // Demo states, replace with API/WebSocket integration
-  const [botStatus, setBotStatus] = useState<"OK" | "KO" | "Active" | "Paused">("Active");
-  const [mode, setMode] = useState<"Auto" | "Manual">("Auto");
-  const [apiEnabled, setApiEnabled] = useState(true);
-  const [budget, setBudget] = useState(1000);
+  const {
+    botStatus,
+    setBotStatus,
+    mode,
+    setMode,
+    handleStart,
+    handleStop,
+    handleRefresh,
+  } = useBotStatus();
+  const {
+    apiEnabled,
+    setApiEnabled,
+    budget,
+    setBudget,
+    handleToggleApi,
+    handleBudgetChange,
+  } = useApiConfig();
+  const {
+    notification,
+    showNotification,
+    closeNotification,
+  } = useNotification();
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [signals, setSignals] = useState<Signal[]>([]);
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -25,25 +47,11 @@ function App() {
   const [winRate, setWinRate] = useState(60);
   const [roi, setRoi] = useState(26.08);
   const [logs, setLogs] = useState<{ type: string; message: string; date: string }[]>([]);
-  const [notification, setNotification] = useState<{ message: string; type?: "success" | "error" | "info" } | null>(null);
 
-  // Demo handlers
-  const handleStart = () => {
-    setBotStatus("Active");
-    setNotification({ message: "Bot started", type: "success" });
-  };
-  const handleStop = () => {
-    setBotStatus("Paused");
-    setNotification({ message: "Bot stopped", type: "info" });
-  };
-  const handleRefresh = () => {
-    setNotification({ message: "Data refreshed", type: "info" });
-  };
-  const handleToggleApi = () => setApiEnabled((v) => !v);
-  const handleBudgetChange = (value: number) => setBudget(value);
-  const handleApproveOrder = (order: Order) => setNotification({ message: `Order for ${order.pair} approved`, type: "success" });
-  const handleBackup = () => setNotification({ message: "Backup completed", type: "success" });
-  const handleExport = () => setNotification({ message: "Export completed", type: "success" });
+  // Demo handlers using custom hooks
+  const handleApproveOrder = (order: Order) => showNotification(`Order for ${order.pair} approved`, "success");
+  const handleBackup = () => showNotification("Backup completed", "success");
+  const handleExport = () => showNotification("Export completed", "success");
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-2 md:p-6">
@@ -60,7 +68,7 @@ function App() {
         <EventLog logs={logs} />
         <BackupExport onBackup={handleBackup} onExport={handleExport} />
         {notification && (
-          <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+          <Notification message={notification.message} type={notification.type} onClose={closeNotification} />
         )}
       </div>
     </div>
