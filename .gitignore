@@ -21,8 +21,3 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-REACT_APP_API_BASE_URL=http://localhost:3001/api
-REACT_APP_WEBSOCKET_URL=ws://localhost:3001
-REACT_APP_APP_NAME=Trading Bot Dashboard
-REACT_APP_VERSION=1.0.0
